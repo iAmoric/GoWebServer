@@ -3,23 +3,30 @@ package main
 import (
 	"net/http"
 	"fmt"
+    "log"
 )
 
 
-func sayHello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Main page")
+func rootPage(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Your are on the main page")
+
 }
 
-func search(w http.ResponseWriter, r *http.Request) {
+
+func searchPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Your are on the search page")
 }
 
 
 func main() {
-	http.HandleFunc("/", sayHello)
-	http.HandleFunc("/search", search)
+    // url handler
+    http.HandleFunc("/", rootPage)
+	http.HandleFunc("/search", searchPage)
+
+    // start server
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
-		panic(err)
+		log.Fatal("ListenAndServe: ", err)
 	}
+    log.Println("Server listening on 8080")
 }
