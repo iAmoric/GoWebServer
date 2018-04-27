@@ -39,6 +39,11 @@ La page de recherche (`/search?language={language}`) affiche la liste résultant
 
 Dans tous les cas, le nombre de lignes de code est affiché.
 
+### Explications techniques
+
+Le dossier `src/` contient un sous-dossier `tests/`. Ce dossier ne contient pas des tests pour le code, mais des essais (sur la création d'un serveur web ou l'utilisation de l'API GitHub). En effet, ce projet est mon premier projet utilisant le langage Go, et il m'a été nécessaire d'effectuer ces tests afin de comprendre le fonctionnement du langage.
+
+
 ## Auteur
 
 * [**Lucas Pierrat**](https://github.com/iAmoric) - [contact](mailto:pierratlucas@gmail.com)
