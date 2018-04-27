@@ -43,6 +43,9 @@ Dans tous les cas, le nombre de lignes de code est affiché.
 
 Le dossier `src/` contient un sous-dossier `tests/`. Ce dossier ne contient pas des tests pour le code, mais des essais (sur la création d'un serveur web ou l'utilisation de l'API GitHub). En effet, ce projet est mon premier projet utilisant le langage Go, et il m'a été nécessaire d'effectuer ces tests afin de comprendre le fonctionnement du langage.
 
+De même, le dossier `templates/` contient des templates html qui ne sont pas utilisés dans le code final.
+
+Le seul fichier exécutable est `src/apiserver.go`.
 
 ## Auteur
 
