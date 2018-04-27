@@ -3,35 +3,17 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"html/template"
 	"encoding/json"
 	"io/ioutil"
     "sync"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
 
-// data structure for the html template
-type Repo struct {
-	FullName string
-	Link string
-	Description string
-	Name string
-}
-
-type Language struct {
-	LanguageName string
-	LanguageNumber int
-}
-
-type HomeDatas struct {
-	Repos []Repo
-	Languages []Language
-}
-
-// json object
+// for json object
 type Owner struct {
     Login string `json:"login"`
 }
@@ -46,6 +28,11 @@ type Repository struct {
     Languages map[string]int	// map Name/Lines
 }
 
+type Structure struct {
+	Repositories []Repository `json:"items"`
+}
+
+var structure = new(Structure)
 var repositories []Repository
 
 // global map to store languages name and number of line for each
@@ -181,22 +168,33 @@ func parseStringLanguage(str string)  map[string]int{
 
 }
 
-func apiRequest() {
-    // TODO : get 100 last public repositories
-	var N = 130000000 // start point. TODO : find another method...
-    var repository_url = fmt.Sprintf("%s%d", "https://api.github.com/repositories?since=", N)
+
+/*
+This function makes the query to the api,parses the json responses,
+and starts goroutines to treats json.
+All goroutines wait for others.
+*/
+func apiRequest(url string, search bool) {
+
 
     // do request to http api
-    var res = request(repository_url)
-	log.Printf("Request made to github api...\n")
+    var res = request(url)
+	log.Printf("Request made to github api: %s\n", url)
 
 	// read the json
 	jsonResponce, err := ioutil.ReadAll(res.Body)
+
     checkError(err)
 	res.Body.Close()
 
 	// Parse json data
-	err = json.Unmarshal([]byte(jsonResponce), &repositories)
+	if search {
+		// use this because the json structure isn't the same
+		err = json.Unmarshal([]byte(jsonResponce), structure)
+		repositories = structure.Repositories
+	} else {
+		err = json.Unmarshal([]byte(jsonResponce), &repositories)
+	}
     checkError(err)
 
 	// iterate over each repository
@@ -217,52 +215,132 @@ func apiRequest() {
 }
 
 
+/*
+This function prints the result from the basic query (the home page)
+*/
+func printHomePage(w http.ResponseWriter) {
+	printHeader(w)
+
+	fmt.Fprintf(w, "<h1>Liste des dépôts Github</h1>")
+	fmt.Fprintf(w, "<ul>")
+	for i := 0; i < nb; i++ {
+		fmt.Fprintf(w, "<li><a target=\"_blank\" href=\"%s\">%s</a></li> ", repositories[i].Html_url,repositories[i].Full_Name)
+	}
+	fmt.Fprintf(w, "</ul>")
+
+	fmt.Fprintf(w, "<hr>")
+	fmt.Fprintf(w, "<h1>Statistiques sur les langages</h1>")
+
+	// TODO optimize these loops
+	for k := range mapLocker.Lmap { //each language
+		fmt.Fprintf(w, "%d lines", mapLocker.Lmap[k]) // language name : language number lines
+		fmt.Fprintf(w, "<ul>")
+		for i := 0; i < nb; i++ {   // each repository
+			for kk := range repositories[i].Languages { // each language of each repository
+				if strings.EqualFold(kk, k) { // test if the repository has the concerning language
+					fmt.Fprintf(w, "<li><a target=\"_blank\" href=\"%s\">%s</a> : ", repositories[i].Html_url,repositories[i].Full_Name)	// repo name
+					fmt.Fprintf(w, "%d lines </li>", repositories[i].Languages[kk])	// repo number lines
+				}
+			}
+		}
+		fmt.Fprintf(w, "</ul>")
+	}
+
+	fmt.Fprintf(w, "</body></html>")
+}
+
+
+/*
+This function prints the result from the search query
+*/
+func printSearchPage(w http.ResponseWriter, search string) {
+	printHeader(w)
+
+	fmt.Fprintf(w, "<h1>Liste des dépôts Github utilisant le langage %s</h1>", search)
+
+	// TODO optimize these loops
+	for k := range mapLocker.Lmap { //each language
+		if strings.EqualFold(k, search) {
+			fmt.Fprintf(w, "%d lines", mapLocker.Lmap[k]) // language name : language number lines
+			fmt.Fprintf(w, "<ul>")
+			for i := 0; i < nb; i++ {   // each repository
+				for kk := range repositories[i].Languages { // each language of each repository
+					if strings.EqualFold(kk, k) { // test if the repository has the concerning language
+						fmt.Fprintf(w, "<li><a target=\"_blank\" href=\"%s\">%s</a> : ", repositories[i].Html_url,repositories[i].Full_Name)	// repo name
+						fmt.Fprintf(w, "%d lines </li>", repositories[i].Languages[kk])	// repo number lines
+					}
+				}
+			}
+			fmt.Fprintf(w, "</ul>")
+		}
+	}
+
+	fmt.Fprintf(w, "</body></html>")
+}
+
+
+/*
+This function prints the commun header of the html page
+*/
+func printHeader(w http.ResponseWriter) {
+	str :=`
+		<html>
+		<head>
+			<title>Webserver GO GitHub API</title>
+		</head>
+		<body>
+		<span>Faire une recherche par langage : </span>
+	    <br>
+	    <form action="/search" method="GET">
+	    	<input type="text" name="language">
+	    	<input type="submit" value="Rechercher">
+	    </form>
+		`
+	fmt.Fprintf(w, str)
+}
+
+
+/*
+This function is the handler for the home page
+It makes the query to the api.
+Then it print the result on the page
+*/
 func homePage(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("New request from %s on %s", r.RemoteAddr, r.URL.Path)
+
     // Get datas from the github API
-    apiRequest()
+	// TODO : get 100 LAST public repositories
+	var N = 130000000 // start point. TODO : find another method...
+    var url = fmt.Sprintf("%s%d", "https://api.github.com/repositories?since=", N)
+    apiRequest(url, false)
 
-	// mapLocker.Lmap contains global [language_name; number_line]
-	// repository[i].Languages contains individual [language_name; number_line]
-
-	// fill the data structure for the template
-	Repos := make([]Repo, nb)
-	for i := 0; i < nb; i++ {   // each repository
-		Repos[i].FullName = repositories[i].Full_Name
-		Repos[i].Link = repositories[i].Html_url
-		Repos[i].Description = repositories[i].Description
-		Repos[i].Name = repositories[i].Name
-	}
-
-	// Create a Language list
-	Languages := make([]Language, len(mapLocker.Lmap))
-	var i = 0
-	for lkey := range mapLocker.Lmap {	//each language
-		Languages[i].LanguageName = string(lkey)
-		Languages[i].LanguageNumber = mapLocker.Lmap[lkey]
-		i += 1
-	}
-
-	homeData := HomeDatas {
-        Repos,
-		Languages,
-    }
-
-    // Parse and execute template with datas
-    tmpl := template.Must(template.ParseFiles("templates/homepage.html"))
+	// display the page
+	printHomePage(w)
 
 
-    err := tmpl.Execute(w, homeData)
-	checkError(err)
 	log.Println("Page successfully loaded with datas")
 }
 
+
+/*
+This function is the handler for the search page
+It takes the language passed as parameter in the url
+and makes the query to the api.
+Then it print the result on the page
+*/
 func searchPage(w http.ResponseWriter, r *http.Request)  {
 	log.Printf("New request from %s on %s", r.RemoteAddr, r.URL.Path)
 
 	search :=r.FormValue("language")
 	log.Printf("Searching for %s", search)
+
+	var url = "https://api.github.com/search/repositories?q=language:" + search
+    apiRequest(url, true)
+
+	printSearchPage(w, search)
+
+	log.Println("Page successfully loaded with datas")
 }
 
 
@@ -277,4 +355,6 @@ func main() {
 	// start server
 	http.ListenAndServe(":8080", r)
 	log.Println("Server listenning on 8080")
+
+
 }
