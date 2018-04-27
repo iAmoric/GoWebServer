@@ -18,22 +18,34 @@ type Repo struct {
 	FullName string
 	Link string
 	Description string
+	Name string
 }
-type Datas struct {
+
+type Language struct {
+	LanguageName string
+	LanguageNumber int
+}
+
+type HomeDatas struct {
 	Repos []Repo
+	Languages []Language
 }
 
 // json object
 type Owner struct {
     Login string `json:"login"`
 }
+
 type Repository struct {
+	Name string `json:name`
     Full_Name string `json:"full_name"`
     Html_url string `json:"html_url"`
     Description string `json:"description"`
+	Owner Owner
     Languages_url string `json:"languages_url"`
-    Languages map[string]int
+    Languages map[string]int	// map Name/Lines
 }
+
 var repositories []Repository
 
 // global map to store languages name and number of line for each
@@ -220,18 +232,37 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		Repos[i].FullName = repositories[i].Full_Name
 		Repos[i].Link = repositories[i].Html_url
 		Repos[i].Description = repositories[i].Description
+		Repos[i].Name = repositories[i].Name
 	}
-	data := Datas {
+
+	// Create a Language list
+	Languages := make([]Language, len(mapLocker.Lmap))
+	var i = 0
+	for lkey := range mapLocker.Lmap {	//each language
+		Languages[i].LanguageName = string(lkey)
+		Languages[i].LanguageNumber = mapLocker.Lmap[lkey]
+		i += 1
+	}
+
+	homeData := HomeDatas {
         Repos,
+		Languages,
     }
 
     // Parse and execute template with datas
     tmpl := template.Must(template.ParseFiles("templates/homepage.html"))
 
 
-    err := tmpl.Execute(w, data)
+    err := tmpl.Execute(w, homeData)
 	checkError(err)
 	log.Println("Page successfully loaded with datas")
+}
+
+func searchPage(w http.ResponseWriter, r *http.Request)  {
+	log.Printf("New request from %s on %s", r.RemoteAddr, r.URL.Path)
+
+	search :=r.FormValue("language")
+	log.Printf("Searching for %s", search)
 }
 
 
@@ -240,7 +271,8 @@ func main() {
 	r := mux.NewRouter()
 
 	// url handler
-	r.HandleFunc("/", homePage)
+	r.HandleFunc("/", homePage).Methods("GET")
+	r.HandleFunc("/search", searchPage).Methods("GET")
 
 	// start server
 	http.ListenAndServe(":8080", r)
