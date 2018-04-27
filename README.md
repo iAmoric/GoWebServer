@@ -7,7 +7,9 @@ Le but de ce projet est de montrer les capacités à réaliser un utilitaire uti
 
 ## Installation
 
-Ce projet n'est pas installable via la command 'go get'. Il suffit de télécharger l'archive du projet [ici](https://github.com/iAmoric/GoWebServer/archive/master.zip)
+Ce projet est installable via la command 'go get' : `go get github.com/iAmoric/GoWebServer/server`.
+
+ Il est également possible de télécharger l'archive du projet [ici](https://github.com/iAmoric/GoWebServer/archive/master.zip)
 
 ## Utilisation
 
