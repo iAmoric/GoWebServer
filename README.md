@@ -3,11 +3,11 @@
 ## À propos
 
 Ce projet a été réalisé dans le cadre d'un test technique pour l'entreprise [Scalingo](https://scalingo.com/).
-Le but de ce projet est de montrer les capacités à réaliser un utilitaire utilisant des des ressources externes de type API HTTP et de traiter les résultats de ces ressources en parallèle. Le sujet complet peut être trouvé [ici](https://github.com/iAmoric/GoWebServer/blob/master/TechnicalTests_Backend_FR.pdf)
+Le but de ce projet est de montrer les capacités à réaliser un utilitaire utilisant des ressources externes de type API HTTP et de traiter les résultats de ces ressources en parallèle. Le sujet complet peut être trouvé [ici](https://github.com/iAmoric/GoWebServer/blob/master/TechnicalTests_Backend_FR.pdf)
 
 ## Installation
 
-Ce projet est installable via la command 'go get' : `go get github.com/iAmoric/GoWebServer/server`.
+Ce projet est installable via la commande 'go get' : `go get github.com/iAmoric/GoWebServer/server`.
 
  Il est également possible de télécharger l'archive du projet [ici](https://github.com/iAmoric/GoWebServer/archive/master.zip)
 
@@ -29,11 +29,11 @@ La requête pour lister les languages d'un dépot GitHub est : `https://api.gith
 La requête pour lister les dépôts GitHub avec un langage particulier est :
 `https://api.github.com/search/repositories?q=language:{language}`
 
-Les requêtes permettant de récupérer les langages utilisés par un certain dépôts GitHub sont faites en parallèle. Le traitement est limité à 10 `goroutines` en parallèle.
+Les requêtes permettant de récupérer les langages utilisés par un dépôt GitHub en particulier sont faites en parallèle. Le traitement est limité à 10 `goroutines` en parallèle.
 
 ### Affichage
 
-La page d'accueil (`/`) affiche la liste des 100 dépôts GitHub, ainsi que la liste des langages utilisés et leur dépôts associés.
+La page d'accueil (`/`) affiche la liste des 100 dépôts GitHub, ainsi que la liste des langages utilisés et leur dépôts associés. Cependant, ce n'est pas la liste des 100 derniers dépôts. L'API ne permet de rechercher directement les 100 derniers dépôts, et faire une recherche en boucle dépassait la limite de requêtes à l'API.
 
 Un formulaire de recherche permet de rechercher les dépôts GitHub utilisant un langage particulier.
 
@@ -43,7 +43,7 @@ Dans tous les cas, le nombre de lignes de code est affiché.
 
 ### Explications techniques
 
-Le dépôts contient un dossier `tests/`. Ce dossier ne contient pas des tests pour le code, mais des essais (sur la création d'un serveur web ou l'utilisation de l'API GitHub). En effet, ce projet est mon premier projet utilisant le langage Go, et il m'a été nécessaire d'effectuer ces tests afin de comprendre le fonctionnement du langage.
+Le dépôt contient un dossier `tests/`. Ce dossier ne contient pas des tests pour le code, mais des essais (sur la création d'un serveur web ou l'utilisation de l'API GitHub). En effet, ce projet est mon premier projet utilisant le langage Go, et il m'a été nécessaire d'effectuer ces tests afin de comprendre le fonctionnement du langage.
 
 De même, le dossier `templates/` contient des templates html qui ne sont plus utilisés dans le code final.
 
@@ -55,4 +55,4 @@ Le seul fichier exécutable est `server/apiserver.go`.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/iAmoric/GoWebServer/blob/master/LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/iAmoric/GoWebServer/blob/master/LICENSE) file for details
