@@ -7,7 +7,7 @@
         <h1>Liste des dépôts github</h1>
         <ul>
             {{range .Repos}}
-                <li><a href="{{.Link}}">{{.FullName}}</li>
+                <li><a href="{{.Link}}">{{.FullName}}</a> - {{.Description}}</li>
             {{end}}
         </ul>
     </body>
