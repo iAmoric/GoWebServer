@@ -1,0 +1,20 @@
+
+<html>
+<head>
+    <title>Webserver GO GitHub API</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+    <script src="https://codepen.io/anon/pen/aWapBE.js"></script>
+</head>
+<body>
+    
+    <h1>Liste des dépôts github utilisant le langage {{.Language}}</h1>
+    <ul>
+        {{range .Repos}}
+            <li><a target="_blank" href="{{.Link}}">{{.FullName}}</a> - {{.Description}} [<a href="/details/{{.Name}}">Détails</a>]</li>
+        {{end}}
+    </ul>
+
+    <hr>
+
+</body>
+</html>
