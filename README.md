@@ -38,3 +38,11 @@ Un formulaire de recherche permet de rechercher les dépôts GitHub utilisant un
 La page de recherche (`/search?language={language}`) affiche la liste résultant de la recherche ci-dessus.
 
 Dans tous les cas, le nombre de lignes de code est affiché.
+
+## Auteur
+
+* [**Lucas Pierrat**](https://github.com/iAmoric) - [contact](mailto:pierratlucas@gmail.com)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/iAmoric/GoWebServer/blob/master/LICENSE.md) file for details
