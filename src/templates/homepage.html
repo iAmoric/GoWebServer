@@ -1,0 +1,14 @@
+
+<html>
+    <head>
+        <title>Webserver GO GitHub API</title>
+    </head>
+    <body>
+        <h1>Liste des dépôts github</h1>
+        <ul>
+            {{range .Repos}}
+                <li><a href="{{.Link}}">{{.FullName}}</li>
+            {{end}}
+        </ul>
+    </body>
+</html>
