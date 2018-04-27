@@ -50,6 +50,9 @@ var token = "c78019fdfdff8d99b179407dee3a56308ff1f1f2"
 // Number of repositories that will be recovered by the API
 var nb int
 
+// Limit the number of parallel goroutines
+var maxGoroutines = 10
+
 /*
 This function check if there is any error.
 In case of error, it prints the error and exits the program
@@ -205,9 +208,14 @@ func apiRequest(url string, search bool) {
     var wg sync.WaitGroup
     wg.Add(nb)
 
+	guard := make(chan struct{}, maxGoroutines)
 	for i := 0; i < nb; i++ {
         // run goroutine for request and parse responses
-        go parseLanguageRouting(repositories[i].Languages_url, i, &wg)
+		guard <-struct {} {} // block if already filled -> max 10 at the same times
+		go func (url string, index int, waitgroup *sync.WaitGroup) {
+			parseLanguageRouting(url, index, waitgroup)
+			<- guard
+		} (repositories[i].Languages_url, i, &wg)
     }
 
 	// wait for all goroutines
