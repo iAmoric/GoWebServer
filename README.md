@@ -45,4 +45,4 @@ Dans tous les cas, le nombre de lignes de code est affiché.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/iAmoric/GoWebServer/blob/master/LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/iAmoric/GoWebServer/blob/master/LICENSE) file for details
