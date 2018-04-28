@@ -241,7 +241,7 @@ func printHomePage(w http.ResponseWriter) {
 
 	// TODO optimize these loops
 	for k := range mapLocker.Lmap { //each language
-		fmt.Fprintf(w, "%d lines", mapLocker.Lmap[k]) // language name : language number lines
+		fmt.Fprintf(w, "%s: %d lines", k, mapLocker.Lmap[k]) // language name : language number lines
 		fmt.Fprintf(w, "<ul>")
 		for i := 0; i < nb; i++ {   // each repository
 			for kk := range repositories[i].Languages { // each language of each repository
