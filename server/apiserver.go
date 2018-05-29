@@ -9,6 +9,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -45,7 +46,7 @@ var mapLocker = struct{
 
 // This program use the OAuth authentication.
 // Please put your Github API token here
-var token = ""
+var token = "faec757f2c5ea37baa1a8be53e964f9c0b0022a7"
 
 // Number of repositories that will be recovered by the API
 var nb int
@@ -53,6 +54,7 @@ var nb int
 // Limit the number of parallel goroutines
 var maxGoroutines = 10
 
+var port = 8080
 /*
 This function check if there is any error.
 In case of error, it prints the error and exits the program
@@ -360,9 +362,14 @@ func main() {
 	r.HandleFunc("/", homePage).Methods("GET")
 	r.HandleFunc("/search", searchPage).Methods("GET")
 
-	// start server
-	http.ListenAndServe(":8080", r)
-	log.Println("Server listenning on 8080")
+	portEnv := os.Getenv("PORT")
+	if portEnv != "" {
+		log.Printf("Port %s", portEnv)
+		port, _ = strconv.Atoi(portEnv)
+	}
+	addrString := fmt.Sprintf("%s%d", ":", port)
 
+	// start server
+	http.ListenAndServe(addrString, r)
 
 }
